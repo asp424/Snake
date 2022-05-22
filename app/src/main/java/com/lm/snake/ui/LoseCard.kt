@@ -8,10 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Sync
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,7 +21,7 @@ import com.lm.snake.presentation.MainActivity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoseCard(lose: Boolean, countFrogs: Int) {
+fun LoseCard(lose: Boolean, countFrogs: Int, onReplay: () -> Unit) {
     Column(
         Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -41,27 +38,28 @@ fun LoseCard(lose: Boolean, countFrogs: Int) {
                     animateDpAsState(
                         if (lose) 110.dp else 0.dp
                     ).value
-                ), border = BorderStroke(2.dp, Color.Red), shape = RoundedCornerShape(20.dp)
+                ), border = BorderStroke(2.dp, Color.Red),
+            shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(
+                containerColor = Color.Red
+            )
         ) {
             Text(
                 text = "You lose",
                 modifier = Modifier.padding(top = 20.dp, start = 16.dp),
                 fontStyle = FontStyle.Italic,
-                fontSize = 18.sp
+                fontSize = 18.sp, color = Color.White
             )
 
             Text(
                 text = "Score: $countFrogs",
                 modifier = Modifier.padding(top = 3.dp, start = 20.dp),
                 fontStyle = FontStyle.Italic,
-                fontSize = 16.sp
+                fontSize = 16.sp, color = Color.White
             )
             Box(modifier = Modifier.padding(top = 6.dp, start = 40.dp)) {
-                (LocalContext.current as MainActivity).apply {
                     Icon(Icons.Default.Sync, null, modifier = Modifier.clickable {
-                        setContent { Main() }
-                    })
-                }
+                        onReplay()
+                    }, tint = Color.White)
             }
         }
     }
