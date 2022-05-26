@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,7 +17,7 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
-fun Menu(menu: Boolean, onStart: (Boolean) -> Unit) {
+fun Menu(menu: Boolean, replay: Boolean, lose: Boolean, onReplay: (Boolean) -> Unit,  onStart: (Boolean) -> Unit) {
     var selected by remember { mutableStateOf(true) }
     var state by remember { mutableStateOf(true) }
     Visibility(visible = menu) {
@@ -53,7 +54,8 @@ fun Menu(menu: Boolean, onStart: (Boolean) -> Unit) {
     }
     Column(
         Modifier
-            .fillMaxSize().padding(top = 160.dp)
+            .fillMaxSize()
+            .padding(top = if (menu && replay && !lose) 210.dp else 160.dp)
             .offset(
                 animateDpAsState(if (menu) 0.dp else 120.dp, tween(500)).value,
                 animateDpAsState(if (menu) 0.dp else 100.dp, tween(500),
@@ -67,7 +69,19 @@ fun Menu(menu: Boolean, onStart: (Boolean) -> Unit) {
             onClick = { onStart(selected) },
             containerColor = Color.White
         ) {
-             Icon(if (state) Icons.Default.PlayArrow else Icons.Default.Pause, null)
+            Icon(if (state) Icons.Default.PlayArrow else Icons.Default.Pause, null)
+        }
+        Box(
+            Modifier
+                .size(animateDpAsState(if (menu && replay && !lose) 50.dp else 0.dp).value)
+                .padding(top = 3.dp)
+        ) {
+            FloatingActionButton(
+                onClick = { onReplay(selected) },
+                containerColor = Color.White
+            ) {
+                Icon(Icons.Default.Sync, null)
+            }
         }
     }
 }

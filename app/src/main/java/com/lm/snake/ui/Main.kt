@@ -1,5 +1,6 @@
 package com.lm.snake.ui
 
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -25,7 +26,7 @@ import com.lm.snake.ui.theme.DarkGreen
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun Main() {
     LocalDensity.current.apply {
@@ -41,6 +42,7 @@ fun Main() {
         var side by remember { mutableStateOf("right") }
         var speed by remember { mutableStateOf(300L) }
         var menu by remember { mutableStateOf(true) }
+        var replay by remember { mutableStateOf(false) }
         val width = LocalConfiguration.current.screenWidthDp.dp.toPx() / 2 - rectSize / 2
         val height = cardHeight.toPx() / 2 - rectSize / 2
         val cellsList = remember { mutableStateListOf<Offset>().reset(snakeCount, size) }
@@ -60,13 +62,6 @@ fun Main() {
                     shape = RoundedCornerShape(10.dp)
                 )
                 { onEach { Cell(it, rectSize, width, height) } }
-
-                Text(
-                    text = "Score: $countFrogs",
-                    modifier = Modifier.padding(top = 3.dp, start = 20.dp),
-                    fontStyle = FontStyle.Italic,
-                    fontSize = 16.sp, color = Black
-                )
 
                 Buttons(side) { side = it }
 
@@ -138,16 +133,43 @@ fun Main() {
             }
 
             Canvas(Modifier) { drawRect(DarkGreen, frog, Size(rectSize, rectSize)) }
-            Menu(menu) { menu = !menu; level = it
-            if (lose){
+            Menu(menu, replay, lose, onReplay = {
+                menu = !menu; level = it; replay = true
                 cellsList.reset(snakeCount, size); lose = false
                 frog = size.generateFrog
                 side = "right"
                 speed = 300L
                 countFrogs = 0
-            }
+            }) {
+                menu = !menu; level = it; replay = true
+                if (lose) {
+                    cellsList.reset(snakeCount, size); lose = false
+                    frog = size.generateFrog
+                    side = "right"
+                    speed = 300L
+                    countFrogs = 0
+                }
             }
             LoseCard(lose, countFrogs)
+        }
+        Visibility(visible = !menu) {
+            Column(Modifier
+                .fillMaxSize().padding(top = 315.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center) {
+                Text(
+                    text = "Score: $countFrogs",
+                    modifier = Modifier.padding(top = 3.dp, start = 20.dp),
+                    fontStyle = FontStyle.Italic,
+                    fontSize = 16.sp, color = Black
+                )
+                Text(
+                    text = "Level: ${if (level) "Hard" else "Easy"}",
+                    modifier = Modifier.padding(top = 3.dp, start = 20.dp),
+                    fontStyle = FontStyle.Italic,
+                    fontSize = 16.sp, color = Black
+                )
+            }
         }
     }
 }

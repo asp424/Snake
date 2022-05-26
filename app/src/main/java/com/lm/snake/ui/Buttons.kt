@@ -23,7 +23,7 @@ fun Buttons(side: String, onPress: (String) -> Unit) {
     Button(
         onClick = { if (side != "down") onPress("up") }, colors = ButtonDefaults.buttonColors(
             containerColor = Color.Blue),
-        modifier = Modifier.padding(top = 35.dp)
+        modifier = Modifier.padding(top = 45.dp)
     ) {
         Icon(Icons.Default.KeyboardArrowUp, null, tint = Color.White)
     }
