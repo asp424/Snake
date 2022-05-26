@@ -1,36 +1,73 @@
 package com.lm.snake.ui
 
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.lm.snake.presentation.MainActivity
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
-fun Menu(menu: Boolean, onStart: () -> Unit) {
+fun Menu(menu: Boolean, onStart: (Boolean) -> Unit) {
+    var selected by remember { mutableStateOf(true) }
+    var state by remember { mutableStateOf(true) }
+    Visibility(visible = menu) {
+        Column(
+            Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+
+            ElevatedCard() {
+                Row(
+                    modifier = Modifier.width(
+                        animateDpAsState(
+                            if (menu) 90.dp else 0.dp, tween(500)
+                        ).value
+                    ), verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(selected = selected, onClick = { selected = true })
+                    Text(text = "Hard")
+                }
+
+                Row(
+                    modifier = Modifier.width(
+                        animateDpAsState(
+                            if (menu) 90.dp else 0.dp, tween(500)
+                        ).value
+                    ), verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(selected = !selected, onClick = { selected = false })
+                    Text(text = "Easy")
+                }
+            }
+        }
+    }
     Column(
-        Modifier.fillMaxSize(),
+        Modifier
+            .fillMaxSize().padding(top = 160.dp)
+            .offset(
+                animateDpAsState(if (menu) 0.dp else 120.dp, tween(500)).value,
+                animateDpAsState(if (menu) 0.dp else 100.dp, tween(500),
+                    finishedListener = { state = !state }
+                ).value
+            ),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Box(modifier = Modifier.size(
-            animateDpAsState(
-            if (menu) 60.dp else 0.dp, tween(500)
-        ).value)) {
-            (LocalContext.current as MainActivity).apply {
-                FloatingActionButton(onClick = { onStart() }, containerColor = Color.White) {
-                    Icon(Icons.Default.PlayArrow, null)
-                }
-            }
+        FloatingActionButton(
+            onClick = { onStart(selected) },
+            containerColor = Color.White
+        ) {
+             Icon(if (state) Icons.Default.PlayArrow else Icons.Default.Pause, null)
         }
     }
 }

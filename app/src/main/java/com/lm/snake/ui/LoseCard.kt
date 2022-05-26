@@ -21,9 +21,9 @@ import com.lm.snake.presentation.MainActivity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoseCard(lose: Boolean, countFrogs: Int, onReplay: () -> Unit) {
+fun LoseCard(lose: Boolean, countFrogs: Int) {
     Column(
-        Modifier.fillMaxSize(),
+        Modifier.fillMaxSize().padding(bottom = 180.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -31,36 +31,31 @@ fun LoseCard(lose: Boolean, countFrogs: Int, onReplay: () -> Unit) {
             modifier = Modifier
                 .width(
                     animateDpAsState(
-                        if (lose) 100.dp else 0.dp
+                        if (lose) 90.dp else 0.dp
                     ).value
                 )
                 .height(
                     animateDpAsState(
-                        if (lose) 110.dp else 0.dp
+                        if (lose) 70.dp else 0.dp
                     ).value
                 ), border = BorderStroke(2.dp, Color.Red),
-            shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(
+            shape = RoundedCornerShape(10.dp), colors = CardDefaults.cardColors(
                 containerColor = Color.Red
             )
         ) {
             Text(
                 text = "You lose",
-                modifier = Modifier.padding(top = 20.dp, start = 16.dp),
+                modifier = Modifier.padding(top = 10.dp, start = 10.dp),
                 fontStyle = FontStyle.Italic,
                 fontSize = 18.sp, color = Color.White
             )
 
             Text(
                 text = "Score: $countFrogs",
-                modifier = Modifier.padding(top = 3.dp, start = 20.dp),
+                modifier = Modifier.padding(top = 3.dp, start = 16.dp),
                 fontStyle = FontStyle.Italic,
                 fontSize = 16.sp, color = Color.White
             )
-            Box(modifier = Modifier.padding(top = 6.dp, start = 40.dp)) {
-                    Icon(Icons.Default.Sync, null, modifier = Modifier.clickable {
-                        onReplay()
-                    }, tint = Color.White)
-            }
         }
     }
 }

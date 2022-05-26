@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -15,9 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
-import androidx.compose.ui.graphics.Color.Companion.Green
 import androidx.compose.ui.graphics.Color.Companion.Yellow
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -37,6 +34,8 @@ fun Main() {
         val cardHeight = 500.dp
         val size = rectSize + 5f
         var lose by remember { mutableStateOf(false) }
+        var job: Job by remember { mutableStateOf(Job()) }
+        var level by remember { mutableStateOf(true) }
         var countFrogs by remember { mutableStateOf(0) }
         var frog by remember { mutableStateOf(size.generateFrog) }
         var side by remember { mutableStateOf("right") }
@@ -45,10 +44,11 @@ fun Main() {
         val width = LocalConfiguration.current.screenWidthDp.dp.toPx() / 2 - rectSize / 2
         val height = cardHeight.toPx() / 2 - rectSize / 2
         val cellsList = remember { mutableStateListOf<Offset>().reset(snakeCount, size) }
-
         cellsList.apply {
             Column(
-                Modifier.fillMaxSize().background(Yellow),
+                Modifier
+                    .fillMaxSize()
+                    .background(Yellow),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
@@ -60,16 +60,48 @@ fun Main() {
                     shape = RoundedCornerShape(10.dp)
                 )
                 { onEach { Cell(it, rectSize, width, height) } }
+
                 Text(
                     text = "Score: $countFrogs",
                     modifier = Modifier.padding(top = 3.dp, start = 20.dp),
                     fontStyle = FontStyle.Italic,
-                    fontSize = 16.sp, color = Color.Black
+                    fontSize = 16.sp, color = Black
                 )
+
                 Buttons(side) { side = it }
+
                 LaunchedEffect(menu, lose) {
-                    if (!menu && !lose) scope.launch {
+                    if (!menu) job = scope.launch {
                         while (true) {
+                            when (level) {
+                                true -> {
+                                    if (lastX !in -width + size * 2..width - size * 2 ||
+                                        lastY !in -height + size * 2..height - size * 2
+                                    ) {
+                                        lose = true; cancel(); menu = true
+                                    }
+                                }
+                                false -> {
+                                    when {
+                                        lastX > width - size -> {
+                                            cellsList[cellsList.lastIndex] =
+                                                Offset(lastX - (width * 2), lastY)
+                                        }
+                                        lastX < -width + size -> {
+                                            cellsList[cellsList.lastIndex] =
+                                                Offset(lastX + (width * 2), lastY)
+                                        }
+                                        lastY > height - size -> {
+                                            cellsList[cellsList.lastIndex] =
+                                                Offset(lastX, lastY - (height * 2))
+                                        }
+                                        lastY < -height + size -> {
+                                            cellsList[cellsList.lastIndex] =
+                                                Offset(lastX, lastY + (height * 2))
+                                        }
+                                    }
+                                }
+                            }
                             removeAt(0)
                             when (side) {
                                 "right" -> add(Offset(lastX + size, lastY))
@@ -77,18 +109,15 @@ fun Main() {
                                 "up" -> add(Offset(lastX, lastY - size))
                                 "down" -> add(Offset(lastX, lastY + size))
                             }
-                            if (lastX !in -width + size..width - size ||
-                                lastY !in -height + size..height - size
-                            ) {
-                                lose = true; cancel()
-                            }
+
                             withContext(IO) {
-                                onEachIndexed { i, it ->
-                                    if (lastX == it.x && lastY == it.y && i != lastIndex
-                                    ) {
-                                        lose = true; cancel()
+                                if (level)
+                                    onEachIndexed { i, it ->
+                                        if (lastX == it.x && lastY == it.y && i != lastIndex) {
+                                            lose = true; cancel(); menu = true
+                                        }
                                     }
-                                }
+                                else Unit
                             }
 
                             if (lastX + width == frog.x && lastY + height == frog.y) {
@@ -100,23 +129,25 @@ fun Main() {
                                     "up" -> add(0, Offset(zeroX, zeroY - size))
                                     "down" -> add(0, Offset(zeroX, zeroY + size))
                                 }
-                                speed -= 10L
+                                if (speed in 10L..300L) speed -= 5L
                             }
                             delay(speed)
                         }
-                    }
+                    } else job.cancel()
                 }
             }
 
             Canvas(Modifier) { drawRect(DarkGreen, frog, Size(rectSize, rectSize)) }
-            Menu(menu) { menu = false }
-            LoseCard(lose, countFrogs) {
+            Menu(menu) { menu = !menu; level = it
+            if (lose){
                 cellsList.reset(snakeCount, size); lose = false
                 frog = size.generateFrog
                 side = "right"
                 speed = 300L
                 countFrogs = 0
             }
+            }
+            LoseCard(lose, countFrogs)
         }
     }
 }
