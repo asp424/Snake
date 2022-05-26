@@ -17,7 +17,13 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
-fun Menu(menu: Boolean, replay: Boolean, lose: Boolean, onReplay: (Boolean) -> Unit,  onStart: (Boolean) -> Unit) {
+fun Menu(
+    menu: Boolean,
+    replay: Boolean,
+    lose: Boolean,
+    onReplay: (Boolean) -> Unit,
+    onStart: (Boolean) -> Unit
+) {
     var selected by remember { mutableStateOf(true) }
     var state by remember { mutableStateOf(true) }
     Visibility(visible = menu) {
