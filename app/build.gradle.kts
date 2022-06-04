@@ -40,10 +40,10 @@ dependencies {
     kapt("com.google.dagger:dagger-compiler:2.42")
 
     //Base
-    implementation("androidx.core:core-ktx:1.9.0-alpha03")
+    implementation("androidx.core:core-ktx:1.9.0-alpha04")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.0-rc01")
-    implementation("androidx.activity:activity-compose:1.6.0-alpha03")
+    implementation("androidx.activity:activity-compose:1.5.0-beta01")
 
     //Compose
     implementation("androidx.compose.ui:ui:$composeVersion")
@@ -53,7 +53,8 @@ dependencies {
     implementation("androidx.compose.material:material-icons-core:$composeVersion")
     implementation("androidx.compose.material:material-icons-extended:$composeVersion")
     implementation("androidx.compose.animation:animation:$composeVersion")
-    implementation("androidx.compose.material3:material3:1.0.0-alpha11")
+    implementation("androidx.compose.material3:material3:1.0.0-alpha12")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.1.1")
     implementation("io.coil-kt:coil-compose:2.0.0-rc02")
 }
 

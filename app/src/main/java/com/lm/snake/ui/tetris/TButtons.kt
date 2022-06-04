@@ -1,4 +1,4 @@
-package com.lm.snake.presentation.tetris
+package com.lm.snake.ui.tetris
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons

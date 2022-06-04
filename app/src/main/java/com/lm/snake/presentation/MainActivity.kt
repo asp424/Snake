@@ -3,7 +3,7 @@ package com.lm.snake.presentation
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.lm.snake.presentation.tetris.Tetris
+import com.lm.snake.ui.tetris.Tetris
 import com.lm.snake.ui.Main
 
 class MainActivity : ComponentActivity() {
