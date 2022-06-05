@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lm.snake.ui.snake_game.Visibility
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
