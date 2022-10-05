@@ -1,7 +1,6 @@
-package com.lm.snake.ui
+package com.lm.snake.ui.snake_game
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -12,9 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.Blue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -30,7 +27,10 @@ fun SnapshotStateList<Offset>.Cells(
         Modifier
             .height(cardHeight)
             .fillMaxWidth()
-            .padding(10.dp), border = BorderStroke(2.dp, Color.Black),
+            .padding(10.dp)
+            .noRippleClickable { counter.value = counter.value + 1 }
+        , border = BorderStroke(2.dp, Color.Black),
+
         shape = RoundedCornerShape(10.dp)
     )
     {

@@ -1,4 +1,4 @@
-package com.lm.snake.ui
+package com.lm.snake.ui.snake_game
 
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.geometry.Offset

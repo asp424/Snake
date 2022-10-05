@@ -1,4 +1,4 @@
-package com.lm.snake.ui
+package com.lm.snake.ui.snake_game
 
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.animateDpAsState

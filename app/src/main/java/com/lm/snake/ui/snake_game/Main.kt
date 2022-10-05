@@ -1,5 +1,7 @@
-package com.lm.snake.ui
+package com.lm.snake.ui.snake_game
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -10,16 +12,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color.Companion.Yellow
+import androidx.compose.ui.graphics.Color.Companion.Green
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import com.lm.snake.ui.Buttons
+import com.lm.snake.ui.Menu
+import com.lm.snake.ui.Statistic
 import com.lm.snake.ui.theme.DarkGreen
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Main() {
     LocalDensity.current.apply {
@@ -44,7 +50,9 @@ fun Main() {
             Column(
                 Modifier
                     .fillMaxSize()
-                    .background(Yellow),
+                    .background(Green)
+                    .noRippleClickable { close() }
+                ,
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
@@ -93,6 +101,9 @@ fun Main() {
                 } else job.cancel()
             }
         }
+        if (counter.value == 10) load()
+        Notes(visibility.value)
     }
 }
+
 

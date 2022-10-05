@@ -1,4 +1,4 @@
-package com.lm.snake.ui
+package com.lm.snake.ui.snake_game
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable

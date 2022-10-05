@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
+    id("com.google.gms.google-services")
 }
 
 val composeVersion = "1.2.0-beta01"
@@ -17,9 +18,19 @@ android {
         testInstrumentationRunner = testRunner
         vectorDrawables { useSupportLibrary = true }
         buildTypes {
+            debug {
+                buildConfigField("String", "FCM_BASE_URL", "\"https://fcm.googleapis.com/fcm/\"")
+                buildConfigField("String", "FCM_SERVER_KEY", "\"AAAAEI-8DO0:APA91bEL_-qZTAUGWwZbCwKwgavdfJ9jznG3a52E3G3QDCrUXbSOAzQ6TBcyHSm-iBZsg43KELek9ZueUn59F2Z4AWhNnbrXPYAKY5RG8AsOGLOMmr1IoKC9h-O8TAktqXlHnWL7TvvR\"")
+                buildConfigField("String", "C_KEY", "\"jfdjga879coaerhd\"")
+                isMinifyEnabled = true
+                isShrinkResources = true
+            }
             release {
                 isMinifyEnabled = true
+                isShrinkResources = true
                 proguardFiles(getDefaultProguardFile(proGName), proGRules)
+                buildConfigField("String", "FCM_SERVER_KEY", "\"AAAAEI-8DO0:APA91bEL_-qZTAUGWwZbCwKwgavdfJ9jznG3a52E3G3QDCrUXbSOAzQ6TBcyHSm-iBZsg43KELek9ZueUn59F2Z4AWhNnbrXPYAKY5RG8AsOGLOMmr1IoKC9h-O8TAktqXlHnWL7TvvR\"")
+                buildConfigField("String", "KEY", "\"jfdjga879coaerhd\"")
             }
         }
         composeOptions { kotlinCompilerExtensionVersion = composeVersion }
@@ -37,6 +48,9 @@ dependencies {
 
     //Dagger
     implementation("com.google.dagger:dagger:2.42")
+    implementation("com.google.firebase:firebase-database-ktx:20.0.6")
+    implementation("com.google.firebase:firebase-messaging-ktx:23.0.8")
+    //implementation ("com.google.firebase:firebase-admin:9.0.0")
     kapt("com.google.dagger:dagger-compiler:2.42")
 
     //Base
@@ -56,6 +70,13 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.0.0-alpha12")
     implementation("androidx.compose.ui:ui-tooling-preview:1.1.1")
     implementation("io.coil-kt:coil-compose:2.0.0-rc02")
+
+    //Retrofit
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-scalars:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
+
 }
 
 

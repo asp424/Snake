@@ -17,49 +17,64 @@ import androidx.compose.ui.graphics.Color.Companion.Blue
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun TButtons(
     offsetY: Int,
-    onHold: (String, Boolean) -> Unit
-    ) {
-    Column(
-        Modifier
-            .padding(start = 40.dp, end = 40.dp, top = 10.dp)
-            .fillMaxSize()
-            .offset(0.dp, offsetY.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Row(
+    shiftX: (String) -> Unit,
+    shiftY: (Boolean) -> Unit,
+    rotation: () -> Unit
+) {
+    var shiftJob: Job by remember { mutableStateOf(Job()) }
+    buttonEvents.apply {
+        Column(
             Modifier
-                .fillMaxWidth()
-                .padding(bottom = 5.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(start = 40.dp, end = 40.dp, top = 10.dp)
+                .fillMaxSize()
+                .offset(0.dp, offsetY.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Button(
-                {}, Modifier.onHoldFinger{ onHold("left", it) },
-                colors = ButtonDefaults.buttonColors(Blue)
-            ) { Icon(Icons.Default.KeyboardArrowLeft, null, tint = White) }
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 5.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Button(
+                    {}, Modifier.motionEventSpy {
+                        if (it.action == 0) shiftX(LEFT)
+                        else shiftJob.cancel()
+                    },
+                    colors = ButtonDefaults.buttonColors(Blue)
+                ) { Icon(Icons.Default.KeyboardArrowLeft, null, tint = White) }
+
+                Button(
+                    { rotation() }, colors = ButtonDefaults.buttonColors(Blue)
+                ) { Icon(Icons.Default.Sync, null, tint = White) }
+
+                Button(
+                    {}, Modifier.motionEventSpy {
+                        if (it.action == 0) shiftX(RIGHT)
+                        else shiftJob.cancel()
+                    },
+                    colors = ButtonDefaults.buttonColors(Blue)
+                ) { Icon(Icons.Default.KeyboardArrowRight, null, tint = White) }
+            }
 
             Button(
-                { onHold("rotation", false) }, colors = ButtonDefaults.buttonColors(Blue)
-            ) { Icon(Icons.Default.Sync, null, tint = White) }
-
-            Button(
-                {}, Modifier.onHoldFinger{ onHold("right", it) },
-                colors = ButtonDefaults.buttonColors(Blue)
-            ) { Icon(Icons.Default.KeyboardArrowRight, null, tint = White) }
-        }
-
-        Button(
-            onClick = {}, Modifier.onHoldFinger{ onHold("down", it) },
-            colors = ButtonDefaults.buttonColors(Blue),
-        ) {
-            Icon(Icons.Default.KeyboardArrowDown, null, tint = White)
+                onClick = {}, Modifier.motionEventSpy { shiftY(it.action == 0) },
+                colors = ButtonDefaults.buttonColors(Blue),
+            ) {
+                Icon(Icons.Default.KeyboardArrowDown, null, tint = White)
+            }
         }
     }
 }
-
 
 
 

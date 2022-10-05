@@ -22,7 +22,7 @@ internal fun Visibility(visible: Boolean, content: @Composable (AnimatedVisibili
 
             initialAlpha = 0.3f
         ),
-        exit = slideOutVertically() + shrinkVertically() + fadeOut()
+        exit = fadeOut()
     ) {
         content(this)
     }
