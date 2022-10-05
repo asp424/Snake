@@ -20,8 +20,8 @@ android {
         buildTypes {
             debug {
                 buildConfigField("String", "FCM_BASE_URL", "\"https://fcm.googleapis.com/fcm/\"")
-                buildConfigField("String", "FCM_SERVER_KEY", "\"AAAAEI-8DO0:APA91bEL_-qZTAUGWwZbCwKwgavdfJ9jznG3a52E3G3QDCrUXbSOAzQ6TBcyHSm-iBZsg43KELek9ZueUn59F2Z4AWhNnbrXPYAKY5RG8AsOGLOMmr1IoKC9h-O8TAktqXlHnWL7TvvR\"")
-                buildConfigField("String", "C_KEY", "\"jfdjga879coaerhd\"")
+                buildConfigField("String", "FCM_SERVER_KEY", "\"123\"")
+                buildConfigField("String", "C_KEY", "\"123\"")
                 isMinifyEnabled = true
                 isShrinkResources = true
             }
@@ -29,8 +29,8 @@ android {
                 isMinifyEnabled = true
                 isShrinkResources = true
                 proguardFiles(getDefaultProguardFile(proGName), proGRules)
-                buildConfigField("String", "FCM_SERVER_KEY", "\"AAAAEI-8DO0:APA91bEL_-qZTAUGWwZbCwKwgavdfJ9jznG3a52E3G3QDCrUXbSOAzQ6TBcyHSm-iBZsg43KELek9ZueUn59F2Z4AWhNnbrXPYAKY5RG8AsOGLOMmr1IoKC9h-O8TAktqXlHnWL7TvvR\"")
-                buildConfigField("String", "KEY", "\"jfdjga879coaerhd\"")
+                buildConfigField("String", "FCM_SERVER_KEY", "\"123\"")
+                buildConfigField("String", "KEY", "\"123\"")
             }
         }
         composeOptions { kotlinCompilerExtensionVersion = composeVersion }
