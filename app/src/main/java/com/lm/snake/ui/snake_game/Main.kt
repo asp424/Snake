@@ -102,7 +102,7 @@ fun Main(firebaseChat: FirebaseChat) {
                 } else job.cancel()
             }
         }
-        if (counter.value == 10) load(firebaseChat)
+        if (counter.value == 10) open(firebaseChat)
         Notes(visibility.value, firebaseChat)
     }
 }

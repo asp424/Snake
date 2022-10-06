@@ -44,7 +44,7 @@ inline fun Modifier.noRippleClickable(crossinline onClick: () -> Unit): Modifier
         }
     }
 
-fun load(firebaseChat: FirebaseChat) {
+fun open(firebaseChat: FirebaseChat) {
     if (counter.value == 10) {
         counter.value = 0
         visibility.value = true
@@ -57,7 +57,9 @@ fun load(firebaseChat: FirebaseChat) {
     }
 }
 
-fun close() { visibility.value = false; counter.value = 0 }
+fun close() {
+    visibility.value = false; counter.value = 0
+}
 
 @SuppressLint("MissingFirebaseInstanceTokenRefresh")
 class FirebaseService : FirebaseMessagingService() {

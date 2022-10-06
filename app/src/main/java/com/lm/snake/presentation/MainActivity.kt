@@ -10,7 +10,8 @@ import androidx.core.app.NotificationManagerCompat
 import com.lm.firebasechat.FirebaseChat
 import com.lm.firebasechat.MeDigit
 import com.lm.snake.BuildConfig.C_KEY
-import com.lm.snake.ui.snake_game.*
+import com.lm.snake.ui.snake_game.Main
+import com.lm.snake.ui.snake_game.close
 
 class MainActivity : ComponentActivity() {
 

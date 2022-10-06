@@ -1,9 +1,13 @@
 package com.lm.firebasechat
 
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
@@ -51,9 +55,7 @@ class FirebaseChat private constructor(
 
     override fun onPause(owner: LifecycleOwner) {
         super.onPause(owner)
-        setOffline()
-        setNoWriting()
-        stopListener()
+        setOffline(); setNoWriting(); stopListener()
         activity?.lifecycle?.removeObserver(this)
     }
 
@@ -66,39 +68,31 @@ class FirebaseChat private constructor(
     fun setWriting() = save("1", Nodes.WRITING.node())
 
     fun saveMessage(text: String) {
-        Nodes.MESSAGES.node().child.apply {
             firebaseHandler.runTask(
-                updateChildren(
+                Nodes.MESSAGES.node().child.updateChildren(
                     mapOf(randomId to crypto.cipherEncrypt("$getName: $text", cryptoKey))
                 )
             )
         }
-    }
 
     fun deleteAllMessages() = Nodes.MESSAGES.node().child.removeValue()
 
-    fun getAndSaveToken(onGet: (String) -> Unit) {
-        FirebaseMessaging.getInstance()
-            .token.addOnCompleteListener {
+    fun getAndSaveToken(onGet: (String) -> Unit) =
+        FirebaseMessaging.getInstance().token.addOnCompleteListener {
                 if (it.isSuccessful) {
-                    val token = it.result.toString()
-                    saveToken(token)
-                    onGet(token)
+                    it.result.toString().also { token -> saveToken(token); onGet(token) }
                 }
             }
-    }
 
     fun startListener(
-        onMessage: (List<String>) -> Unit,
-        onOnline: (String) -> Unit,
-        onWriting: (String) -> Unit
+        onMessage: (List<String>) -> Unit, onOnline: (String) -> Unit, onWriting: (String) -> Unit
     ) {
         stopListener()
         messagesJob = CoroutineScope(IO).launch {
             runListener(Nodes.MESSAGES.node(), ListenerMode.REALTIME).collect {
-                if (it is RemoteLoadStates.Success<*>){
-                   onMessage((it.data as DataSnapshot).children.toList().map { v ->
-                       crypto.cipherDecrypt(v.value.toString(), cryptoKey)
+                if (it is RemoteLoadStates.Success<*>) {
+                    onMessage((it.data as DataSnapshot).children.toList().map { v ->
+                        crypto.cipherDecrypt(v.value.toString(), cryptoKey)
                     })
                 } else {
                     listOf(((it as RemoteLoadStates.Failure<*>).data as DatabaseError).message)
@@ -106,32 +100,21 @@ class FirebaseChat private constructor(
             }
         }
 
-        writingJob = CoroutineScope(IO).launch {
-            runListener(Nodes.WRITING.node(), ListenerMode.REALTIME).collect {
-                it.checkValue { v -> onWriting(v) }
-            }
-        }
-
-        onlineJob = CoroutineScope(IO).launch {
-            runListener(Nodes.ONLINE.node(), ListenerMode.REALTIME).collect {
-                it.checkValue { v -> onOnline(v) }
-            }
-        }
+        writingJob = listener(Nodes.WRITING.node()){ onWriting(it) }
+        onlineJob = listener(Nodes.ONLINE.node()){ onOnline(it) }
     }
 
-    fun stopListener(){
-        messagesJob.cancel()
-        writingJob.cancel()
-        onlineJob.cancel()
-    }
-
-    fun sendNotification(apiKey: String) { readToken { fcmProvider.sendRemoteMessage(it, apiKey) } }
-
-    private fun save(value: String, node: String) {
-        node.getNode.child.apply {
-            firebaseHandler.runTask(updateChildren(mapOf("0" to value)))
+    fun listener(node: String, onGet: (String) -> Unit) =
+        CoroutineScope(IO).launch {
+            runListener(node, ListenerMode.REALTIME).collect { it.checkValue { v -> onGet(v) } }
         }
-    }
+
+    fun stopListener() { messagesJob.cancel(); writingJob.cancel(); onlineJob.cancel() }
+
+    fun sendNotification(apiKey: String) = readToken { fcmProvider.sendRemoteMessage(it, apiKey) }
+
+    private fun save(value: String, node: String) =
+            firebaseHandler.runTask(node.getNode.child.updateChildren(mapOf("0" to value)))
 
     private fun ProducerScope<RemoteLoadStates>.eventListener() =
         object : ValueEventListener {
@@ -148,42 +131,31 @@ class FirebaseChat private constructor(
         Nodes.TOKEN.node().child.updateChildren(mapOf(getDigit to token))
     )
 
-    private fun readToken(onRead: (String) -> Unit) {
+    private fun readToken(onRead: (String) -> Unit) =
         CoroutineScope(IO).launch {
             runListener(Nodes.TOKEN.node(), ListenerMode.SINGLE).collect {
-                if (it is RemoteLoadStates.Success<*>) {
-                    (it.data as DataSnapshot).children.map { what ->
-                        if (what.key.toString() == getReverseDigit) {
-                            onRead(what.value.toString())
-                        }
-                    }
+                it.snapshot { w ->
+                    if (w.key.toString() == getReverseDigit) onRead(w.value.toString())
                 }
             }
         }
+
+    private fun RemoteLoadStates.checkValue(onCheck: (String) -> Unit) =
+        snapshot { ds -> if (ds.key == "0") onCheck(ds.value.toString()) }
+
+    private inline fun RemoteLoadStates.snapshot(crossinline onGet: (DataSnapshot) -> Unit) {
+        if (this is RemoteLoadStates.Success<*>) (data as DataSnapshot).children.map { onGet(it) }
     }
 
     private fun runListener(node: String, mode: ListenerMode) = callbackFlow {
         node.getReverseNode.child.apply {
-            when (mode) {
-                ListenerMode.REALTIME -> eventListener()
-                    .also { listener ->
-                        addValueEventListener(listener)
-                        awaitClose { removeEventListener(listener) }
+            eventListener().also { listener ->
+                    when (mode) {
+                        ListenerMode.REALTIME -> addValueEventListener(listener)
+                        ListenerMode.SINGLE -> addListenerForSingleValueEvent(listener)
                     }
-                ListenerMode.SINGLE -> eventListener()
-                    .also { listener ->
-                        addListenerForSingleValueEvent(listener)
-                        awaitClose { removeEventListener(listener) }
-                    }
-            }
-        }
-    }.flowOn(IO)
-
-    private fun RemoteLoadStates.checkValue(onCheck: (String) -> Unit) {
-        if (this is RemoteLoadStates.Success<*>) {
-            (data as DataSnapshot).children.map { ds ->
-                if (ds.key == "0") { onCheck(ds.value.toString()) }
-            }
+                    awaitClose { removeEventListener(listener) }
+                }
         }
     }
 
@@ -194,7 +166,8 @@ class FirebaseChat private constructor(
 
     private val String.getNode get() = if (this == Nodes.MESSAGES.node()) this else "$this$getDigit"
 
-    private val String.getReverseNode get() = when (this) {
+    private val String.getReverseNode
+        get() = when (this) {
             Nodes.MESSAGES.node() -> this
             Nodes.TOKEN.node() -> this
             else -> "$this$getReverseDigit"

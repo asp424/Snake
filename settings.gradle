@@ -1,4 +1,4 @@
 
 rootProject.name = "Snake"
 include ':app'
-include ':FirebaseChat'
+include ':chatFirebase'

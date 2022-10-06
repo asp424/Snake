@@ -1,6 +1,5 @@
 package com.lm.firebasechat
 
-import android.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
 import retrofit2.Call
@@ -10,7 +9,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.HeaderMap
-import retrofit2.http.Headers
 import retrofit2.http.POST
 
 class FCMProvider() {
@@ -23,14 +21,10 @@ class FCMProvider() {
             JSONObject().put("registration_ids", JSONArray().put(token)).toString(),
             headers
         )?.enqueue(object : Callback<String?> {
-            override fun onResponse(call: Call<String?>, response: Response<String?>) {
-                response.code().log
-                response.errorBody()?.string().log
-            }
+            override fun onResponse(call: Call<String?>, response: Response<String?>) {}
             override fun onFailure(call: Call<String?>, t: Throwable) {}
         })
     }
-    val <T> T.log get() = Log.d("My", toString())
 
     private val fCMApi: ApiInterface by lazy {
         Retrofit.Builder()
@@ -42,8 +36,7 @@ class FCMProvider() {
     interface ApiInterface {
         @POST("send")
         fun sendRemoteMessage(
-            @Body remoteBody: String?,
-            @HeaderMap headers: HashMap<String, String>
-            ): Call<String?>?
+            @Body remoteBody: String?, @HeaderMap headers: HashMap<String, String>
+        ): Call<String?>?
     }
 }
