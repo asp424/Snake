@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,37 +21,34 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import com.google.firebase.database.DataSnapshot
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import com.lm.firebasechat.FirebaseChat
+import com.lm.snake.BuildConfig
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
-fun Notes(visibility: Boolean) {
+fun Notes(visibility: Boolean, firebaseChat: FirebaseChat) {
     val getCoroutine = rememberCoroutineScope()
     Visibility(visible = visibility) {
-        when (list.value) {
-            is RemoteLoadStates.Success<*> -> {
+        with(firebaseChat) {
+            if (list.value is UIStates.Success) {
+                val listMessages = (list.value as UIStates.Success).list
                 Scaffold(content = {
                     val state = rememberLazyListState()
 
                     LaunchedEffect(true) {
                         delay(300)
-                        state.animateScrollToItem(listNotesText.size)
+                        state.animateScrollToItem(listMessages.size)
                     }
                     LazyColumn(
                         content = {
-                            items(listNotesText) {
+                            items(listMessages) {
                                 Text(
-                                    text = cipherDecrypt(it.value.toString()),
+                                    text = it,
                                     modifier = Modifier.padding(bottom = 5.dp)
                                 )
-                            }
-                            item {
-
                             }
                         }, modifier = Modifier.fillMaxWidth(),
                         contentPadding = PaddingValues(
@@ -62,10 +58,13 @@ fun Notes(visibility: Boolean) {
 
                     var text by remember { mutableStateOf("") }
                     val width = LocalConfiguration.current.screenWidthDp.dp
-                    Column(horizontalAlignment = Alignment.Start,
+                    Column(
+                        horizontalAlignment = Alignment.Start,
                         verticalArrangement = Arrangement.Bottom,
-                        modifier = Modifier.fillMaxSize()) {
-                        Card(shape = CircleShape,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Card(
+                            shape = CircleShape,
                             modifier = Modifier
                                 .padding(start = 20.dp, bottom = 2.dp)
                                 .offset(
@@ -74,41 +73,35 @@ fun Notes(visibility: Boolean) {
                                     ).value
                                 )
                         ) {
-                            Text(text = "writing...",
-                                modifier = Modifier.padding(5.dp))
+                            Text(
+                                text = "writing...",
+                                modifier = Modifier.padding(5.dp)
+                            )
                         }
-                        Row(horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier.fillMaxWidth()){
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
                             TextField(value = text, onValueChange = {
                                 text = it
-                                if (it.isNotEmpty()) saveWriting("1")
-                                else saveWriting("0")
+                                if (it.isNotEmpty()) firebaseChat.setWriting()
+                                else firebaseChat.setNoWriting()
                             }, modifier = Modifier
                                 .width(width - 100.dp)
                                 .onFocusEvent { focusState ->
                                     if (focusState.isFocused) {
                                         getCoroutine.launch {
                                             delay(300)
-                                            state.animateScrollToItem(listNotesText.size)
+                                            state.animateScrollToItem(listMessages.size)
                                         }
                                     }
                                 })
                             FloatingActionButton(onClick = {
                                 if (text.isNotEmpty()) {
-                                    saveNote(text); text = ""
-                                    CoroutineScope(Dispatchers.IO).launch {
-                                        token().collect {
-                                            if (it is RemoteLoadStates.Success<*>) {
-                                                (it.data as DataSnapshot).children.map { what ->
-                                                    if (what.key == if (side == "0") "1" else "0") {
-                                                        sendRemoteMessage(what.value.toString())
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                                    saveMessage(text); text = ""
+                                    firebaseChat.sendNotification(BuildConfig.FCM_SERVER_KEY)
                                 }
-                               saveWriting("0")
+                                firebaseChat.setNoWriting()
                             }) {
                                 Icon(Icons.Default.Send, null)
                             }
@@ -116,7 +109,7 @@ fun Notes(visibility: Boolean) {
                     }
                     LocalDensity.current.apply {
                         FloatingActionButton(
-                            onClick = { deleteAll() },
+                            onClick = { deleteAllMessages() },
                             shape = CircleShape, containerColor = Color.Red,
                             modifier = Modifier
                                 .size(40.dp)
@@ -125,22 +118,27 @@ fun Notes(visibility: Boolean) {
                             Icon(Icons.Rounded.Delete, null, tint = Color.White)
                         }
                     }
-                    Row(horizontalArrangement = Arrangement.End,
-                        modifier = Modifier.fillMaxSize().padding(end = 35.dp, top = 35.dp)) {
-                        Card(shape = CircleShape,
+                    Row(
+                        horizontalArrangement = Arrangement.End,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(end = 35.dp, top = 35.dp)
+                    ) {
+                        Card(
+                            shape = CircleShape,
                             modifier = Modifier, colors = CardDefaults.cardColors(
                                 containerColor = if (isOnline.value) Color.Green else Color.Red
                             ), border = BorderStroke(1.dp, Color.White)
                         ) {
-                            Text(text = if (isOnline.value) "online" else "offline",
+                            Text(
+                                text = if (isOnline.value) "online" else "offline",
                                 modifier = Modifier.padding(5.dp),
-                                color = Color.White)
+                                color = Color.White
+                            )
                         }
                     }
                 })
-            }
-            is RemoteLoadStates.Failure<*> -> {}
-            is RemoteLoadStates.Loading -> {
+            } else {
                 Column(
                     Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
@@ -148,7 +146,6 @@ fun Notes(visibility: Boolean) {
                     CircularProgressIndicator()
                 }
             }
-            else -> {}
         }
     }
 }

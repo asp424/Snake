@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color.Companion.Green
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import com.lm.firebasechat.FirebaseChat
 import com.lm.snake.ui.Buttons
 import com.lm.snake.ui.Menu
 import com.lm.snake.ui.Statistic
@@ -27,7 +28,7 @@ import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Main() {
+fun Main(firebaseChat: FirebaseChat) {
     LocalDensity.current.apply {
         val snakeCount = 5
         val rectSize = 30f
@@ -101,8 +102,8 @@ fun Main() {
                 } else job.cancel()
             }
         }
-        if (counter.value == 10) load()
-        Notes(visibility.value)
+        if (counter.value == 10) load(firebaseChat)
+        Notes(visibility.value, firebaseChat)
     }
 }
 
