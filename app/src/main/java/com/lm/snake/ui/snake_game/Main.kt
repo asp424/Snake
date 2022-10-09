@@ -52,8 +52,7 @@ fun Main(firebaseChat: FirebaseChat) {
                 Modifier
                     .fillMaxSize()
                     .background(Green)
-                    .noRippleClickable { close() }
-                ,
+                    .noRippleClickable { close(firebaseChat) },
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
@@ -102,7 +101,8 @@ fun Main(firebaseChat: FirebaseChat) {
                 } else job.cancel()
             }
         }
-        if (counter.value == 10) open(firebaseChat)
+        val coroutine = rememberCoroutineScope()
+        if (counter.value == 10) open(firebaseChat, coroutine)
         Notes(visibility.value, firebaseChat)
     }
 }

@@ -1,38 +1,29 @@
 package com.lm.snake.presentation
 
-import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationManagerCompat
-import com.lm.firebasechat.FirebaseChat
-import com.lm.firebasechat.MeDigit
-import com.lm.snake.BuildConfig.C_KEY
 import com.lm.snake.ui.snake_game.Main
 import com.lm.snake.ui.snake_game.close
+import com.lm.snake.ui.snake_game.firebaseChat
 
 class MainActivity : ComponentActivity() {
 
     private val manager by lazy { NotificationManagerCompat.from(applicationContext) }
 
-    private val firebaseChat by lazy {
-        FirebaseChat.Builder()
-            .setName("Геннадич")
-            .setMainNode("leha")
-            .setCryptoKey(C_KEY)
-            .setActivity(this)
-            .setMeDigit(MeDigit.ZERO)
-            .build()
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent { Main(firebaseChat) }
-        if (read(sharedPreferences).isEmpty()) firebaseChat.getAndSaveToken {
-            save(sharedPreferences)
+        packageManager.getPackageInfo(packageName, 0).longVersionCode.also { version ->
+            readVersion().also { savedVersion ->
+                if (savedVersion == 0L || version != savedVersion) {
+                    firebaseChat.getAndSaveToken { saveVersion(version) }
+                }
+            }
         }
     }
 
@@ -43,15 +34,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onPause() {
         super.onPause()
-        close()
+        close(firebaseChat)
     }
 
     private val sharedPreferences by lazy { getSharedPreferences("checkForFirst", MODE_PRIVATE) }
 
-    private fun save(sharedPreferences: SharedPreferences) =
-        sharedPreferences.edit().putString("id", "start").apply()
+    private fun saveVersion(value: Long) = sharedPreferences.edit().putLong("version", value).apply()
 
-    private fun read(sharedPreferences: SharedPreferences) =
-        sharedPreferences.getString("id", "").toString()
+    private fun readVersion() = sharedPreferences.getLong("version", 0L)
 }
 

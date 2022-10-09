@@ -13,7 +13,7 @@ android {
         applicationId = appId
         minSdk = 24
         targetSdk = 33
-        versionCode = 1
+        versionCode = 5
         versionName = appVersion
         testInstrumentationRunner = testRunner
         vectorDrawables { useSupportLibrary = true }

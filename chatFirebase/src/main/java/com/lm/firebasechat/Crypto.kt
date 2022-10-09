@@ -41,7 +41,7 @@ class Crypto {
         }
     }
 
-    fun Cipher.init(mode: Int, key: ByteArray) =
+    private fun Cipher.init(mode: Int, key: ByteArray) =
         init(mode, SecretKeySpec(key, "AES"), IvParameterSpec(key))
 
     private val instance: Cipher get() = Cipher.getInstance("AES/CBC/PKCS5Padding")
